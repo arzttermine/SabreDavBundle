@@ -27,7 +27,7 @@ class CalDavBackend implements BackendInterface
      *
      * @param ContainerInterface $container
      */
-    public function __construct(\Doctrine\ORM\EntityManager $em)
+    public function __construct($em)
     {
         $this->em = $em;
 

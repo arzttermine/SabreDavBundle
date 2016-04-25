@@ -75,7 +75,7 @@ class PrincipalBackend extends AbstractBackend implements CreatePrincipalSupport
      *
      * @param ContainerInterface $container
      */
-    public function __construct(\Doctrine\ORM\EntityManager $em, \FOS\UserBundle\Model\UserManagerInterface $um)
+    public function __construct($em, $um)
     {
         $this->em = $em;
         $this->principals_class = 'Symfony\Component\Security\Core\User\User';
