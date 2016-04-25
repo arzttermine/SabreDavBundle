@@ -2,7 +2,7 @@ arzttermine_sabre_dav:
   path: /{url}
   methods: [HEAD,GET,POST,OPTIONS,PROPFIND,PROPPATCH,MKCOL,COPY,MOVE,DELETE,LOCK,UNLOCK,PUT,PATCH,REPORT]
   defaults:
-    _controller: arzttermine.sabredav.controller:exec
+    _controller: arzttermine.sabredav.controller:execAction
     url: null
   requirements:
     url: /?.*

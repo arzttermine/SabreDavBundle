@@ -4,7 +4,7 @@ services:
     arguments:
         - "@arzttermine.sabredav.server"
         - "@router"
-        - "/dav/"
+        - ""
 
   arzttermine.sabredav.server:
     class: Sabre\DAV\Server 
