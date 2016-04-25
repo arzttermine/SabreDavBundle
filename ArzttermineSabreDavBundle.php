@@ -1,5 +1,5 @@
 <?php
-namespace Arzttermine\Bundle\SabreDavBundle;
+namespace Arzttermine\SabreDavBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 use Symfony\Component\DependencyInjection\ContainerBuilder;

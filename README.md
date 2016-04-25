@@ -42,3 +42,13 @@ class AppKernel extends Kernel
     // ...
 }
 ```
+
+Step 3: Add DAV routes
+-------------------------
+
+```yaml
+# app/config/routing.yml
+dav:
+    resource: "@ArzttermineSabreDavBundle/Resources/config/routing.xml"
+    prefix: dav
+```
