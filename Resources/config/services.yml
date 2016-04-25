@@ -1,0 +1,33 @@
+services:
+  arzttermine.sabredav.controller:
+    class: Arzttermine\SabreDavBundle\Controller\SabreDavController 
+    arguments:
+        - "@arzttermine.sabredav.server"
+	- "@router"
+	- "/dav/"
+
+  arzttermine.sabredav.server:
+    class: Sabre\DAV\Server 
+    arguments:
+        - ["@arzttermine.sabredav_principal_collection", "@arzttermine.sabredav_caldav_collection"]
+
+  arzttermine.sabredav_principal_collection:
+    class: Sabre\DAVACL\PrincipalCollection
+    arguments:
+	- "@arzttermine.sabredav_principal_backend"
+
+  arzttermine.sabredav_principal_backend:
+    class: Arzttermine\SabreDavBundle\SabreDav\PrincipalBackend
+    arguments:
+        - "@service_container"
+
+  arzttermine.sabredav_caldav_collection:
+    class: Sabre\CalDAV\CalendarRoot
+    arguments:
+        - "@arzttermine.sabredav_principal_backend"
+	- "@arzttermine.sabredav_caldav_backend"
+
+  arzttermine.sabredav_caldav_backend:
+    class: Arzttermine\SabreDavBundle\SabreDav\CalDavBackend
+    arguments:
+        - "@service_container"
