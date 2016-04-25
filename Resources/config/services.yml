@@ -31,7 +31,8 @@ services:
   arzttermine.sabredav_principal_backend:
     class: Arzttermine\SabreDavBundle\SabreDav\PrincipalBackend
     arguments:
-        - "@service_container"
+        - "@doctrine.orm.entity_manager"
+        - "@fos_user.user_manager"
 
   arzttermine.sabredav_caldav_plugin:
     class: Sabre\DAVACL\Plugin
@@ -49,4 +50,4 @@ services:
   arzttermine.sabredav_caldav_backend:
     class: Arzttermine\SabreDavBundle\SabreDav\CalDavBackend
     arguments:
-        - "@service_container"
+        - "@doctrine.orm.entity_manager"

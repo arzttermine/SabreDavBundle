@@ -3,15 +3,14 @@ namespace Arzttermine\SabreDavBundle\SabreDav;
 
 use Sabre\CalDAV\Backend\BackendInterface;
 use Sabre\DAV\Exception;
-use Symfony\Component\DependencyInjection\ContainerInterface;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
 
 class CalDavBackend implements BackendInterface
 {
     /**
-     * @var ContainerInterface
+     * @var \Doctrine\ORM\EntityManager 
      */
-    private $_em;
+    private $em;
 
     /**
      * @var string
@@ -28,9 +27,9 @@ class CalDavBackend implements BackendInterface
      *
      * @param ContainerInterface $container
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(\Doctrine\ORM\EntityManager $em)
     {
-        $this->_em = $container->get('doctrine')->getManager();
+        $this->em = $em;
 
         $this->calendar_class = '';
         $this->calendarobjects_class = '';

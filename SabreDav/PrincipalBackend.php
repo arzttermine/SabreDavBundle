@@ -14,7 +14,7 @@ class PrincipalBackend extends AbstractBackend implements CreatePrincipalSupport
     /**
      * @var \Doctrine\ORM\EntityManager
      */
-    private $_em;
+    private $em;
 
     /**
      * @var \FOS\UserBundle\Model\UserManagerInterface
@@ -75,16 +75,12 @@ class PrincipalBackend extends AbstractBackend implements CreatePrincipalSupport
      *
      * @param ContainerInterface $container
      */
-    public function __construct(ContainerInterface $container)
+    public function __construct(\Doctrine\ORM\EntityManager $em, \FOS\UserBundle\Model\UserManagerInterface $um)
     {
-        $this->_em = $container->get('doctrine')->getManager();
+        $this->em = $em;
         $this->principals_class = 'Symfony\Component\Security\Core\User\User';
         $this->principalgroups_class = '';
-        $this->user_manager = $container->get('fos_user.user_manager');
-
-        if ($container->has('fos_user.group_manager')) {
-            $this->group_manager = $container->get('fos_user.group_manager');
-        }
+        $this->user_manager = $um;
     }
 
     /**
