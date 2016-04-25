@@ -2,8 +2,8 @@
 namespace Arzttermine\SabreDavBundle\Controller;
 
 use Sabre\DAV\Server;
+use Sabre\HTTP\Response;
 use Arzttermine\SabreDavBundle\SabreDav\HttpRequest;
-use Arzttermine\SabreDavBundle\SabreDav\HttpResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 use Symfony\Component\Routing\RouterInterface;
@@ -24,9 +24,9 @@ class SabreDavController
      * @param Server          $dav
      * @param RouterInterface $router
      */
-    public function __construct(Server $dav, RouterInterface $router, $base_uri = '')
+    public function __construct(Server $dav, RouterInterface $router)
     {
-        $router->getContext()->setBaseUrl($router->getContext()->getBaseUrl() . $base_uri);
+        $router->getContext()->setBaseUrl($router->getContext()->getBaseUrl());
         $this->dav = $dav;
         $this->dav->setBaseUri($router->generate('arzttermine_sabre_dav', array()));
     }
@@ -44,7 +44,7 @@ class SabreDavController
         };
         $response = new StreamedResponse($callback);
         $dav->httpRequest = new HttpRequest($request);
-        $dav->httpResponse = new HttpResponse($response);
+        $dav->httpResponse = new Response($response->getStatusCode(), $response->headers->all());
 
         return $response;
     }

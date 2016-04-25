@@ -24,6 +24,20 @@ class Configuration implements ConfigurationInterface
         // configure your bundle. See the documentation linked above for
         // more information on that topic.
 
+	$rootNode
+            ->children()
+		->arrayNode('plugins')
+                    ->addDefaultsIfNotSet()
+                    ->children()
+                        ->booleanNode('acl')->defaultFalse()->end()
+                        ->booleanNode('auth')->defaultFalse()->end()
+                        ->booleanNode('content_type')->defaultFalse()->end()
+                        ->booleanNode('principal')->defaultFalse()->end()
+                        ->booleanNode('caldav')->defaultFalse()->end()
+                    ->end()
+                ->end()
+	->end();
+
         return $treeBuilder;
     }
 }

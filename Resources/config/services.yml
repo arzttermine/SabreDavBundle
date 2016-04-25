@@ -4,28 +4,47 @@ services:
     arguments:
         - "@arzttermine.sabredav.server"
         - "@router"
-        - ""
 
   arzttermine.sabredav.server:
     class: Sabre\DAV\Server 
     arguments:
         - ["@arzttermine.sabredav_principal_collection", "@arzttermine.sabredav_caldav_collection"]
 
+  arzttermine.sabredav_acl_plugin:
+    class: Arzttermine\SabreDavBundle\SabreDav\ACLPlugin
+    calls:
+        - [setHideNodesFromListings, [true]]
+        - [setAccessToNodesWithoutACL, [true]]
+
+  arzttermine.sabredav_principal_plugin:
+    class: Sabre\DAVACL\Plugin
+    tags:
+        - { name: arzttermine.sabredav.plugin }
+
   arzttermine.sabredav_principal_collection:
     class: Sabre\DAVACL\PrincipalCollection
     arguments:
         - "@arzttermine.sabredav_principal_backend"
+    tags:
+        - { name: arzttermine.sabredav.collection }
 
   arzttermine.sabredav_principal_backend:
     class: Arzttermine\SabreDavBundle\SabreDav\PrincipalBackend
     arguments:
         - "@service_container"
 
+  arzttermine.sabredav_caldav_plugin:
+    class: Sabre\DAVACL\Plugin
+    tags:
+        - { name: arzttermine.sabredav.plugin }
+
   arzttermine.sabredav_caldav_collection:
     class: Sabre\CalDAV\CalendarRoot
     arguments:
         - "@arzttermine.sabredav_principal_backend"
         - "@arzttermine.sabredav_caldav_backend"
+    tags:
+        - { name: arzttermine.sabredav.collection }
 
   arzttermine.sabredav_caldav_backend:
     class: Arzttermine\SabreDavBundle\SabreDav\CalDavBackend
