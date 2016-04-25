@@ -1,0 +1,25 @@
+
+{
+    "name": "arzttermine/sabredav-bundle",
+    "type": "symfony-bundle",
+    "description": "This bundle integrates the SabreDAV library into Symfony2",
+    "keywords": ["SabreDAV", "WebDAV", "CalDAV", "CardDAV", "iCalendar"],
+    "homepage": "https://github.com/arzttermine/SabreDavBundle",
+    "license": "MIT",
+    "minimum-stability": "dev",
+    "authors": [
+        {
+            "name": "Simon Chrzanowski",
+            "email": "simonch@gmx.de"
+        }
+    ],
+    "require": {
+	"php": ">=5.5.9",
+        "symfony/symfony": "3.0.*",
+        "friendsofsymfony/user-bundle": ">=1.3.5",
+        "sabre/dav": "~3.0"
+    },
+    "autoload": {
+        "psr-4": { "Arzttermine\\SabreDavBundle\\": "" }
+    }
+}
