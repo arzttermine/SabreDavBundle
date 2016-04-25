@@ -1,6 +1,7 @@
 <?php
 namespace Arzttermine\SabreDavBundle\SabreDav;
 
+use Sabre\CalDAV;
 use Sabre\CalDAV\Backend\BackendInterface;
 use Sabre\DAV\Exception;
 use Symfony\Component\Security\Core\Authorization\AuthorizationCheckerInterface;
@@ -25,7 +26,7 @@ class CalDavBackend implements BackendInterface
     /**
      * Constructor
      *
-     * @param ContainerInterface $container
+     * @param \Doctrine\ORM\EntityManager $em 
      */
     public function __construct($em)
     {
@@ -54,7 +55,21 @@ class CalDavBackend implements BackendInterface
      */
     public function getCalendarsForUser($principalUri)
     {
-        return array($principalUri);
+	$calendars = [];
+
+        $components = [];
+        $calendar = [
+            'id'                                                                 => 1,
+            'uri'                                                                => 'work',
+            'principaluri'                                                       => $principalUri,
+            '{' . CalDAV\Plugin::NS_CALENDARSERVER . '}getctag'                  => 'http://sabre.io/ns/sync/0',
+            '{http://sabredav.org/ns}sync-token'                                 => '0',
+            '{' . CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new CalDAV\Xml\Property\SupportedCalendarComponentSet($components),
+            '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp'         => new CalDAV\Xml\Property\ScheduleCalendarTransp('opaque'),
+        ];
+        $calendars[] = $calendar;
+
+        return $calendars;
     }
 
     /**
