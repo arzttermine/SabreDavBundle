@@ -49,6 +49,6 @@ Step 3: Add DAV routes
 ```yaml
 # app/config/routing.yml
 dav:
-    resource: "@ArzttermineSabreDavBundle/Resources/config/routing.xml"
+    resource: "@ArzttermineSabreDavBundle/Resources/config/routing.yml"
     prefix: dav
 ```
