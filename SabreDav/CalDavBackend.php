@@ -1,6 +1,7 @@
 <?php
 namespace Arzttermine\SabreDavBundle\SabreDav;
 
+use Arzttermine\CalendarBundle\Entity\Calendar;
 use Sabre\CalDAV;
 use Sabre\CalDAV\Backend\BackendInterface;
 use Sabre\DAV\Exception;
@@ -55,19 +56,23 @@ class CalDavBackend implements BackendInterface
      */
     public function getCalendarsForUser($principalUri)
     {
-	$calendars = [];
+	    $calendars = [];
 
-        $components = [];
-        $calendar = [
-            'id'                                                                 => 1,
-            'uri'                                                                => 'work',
-            'principaluri'                                                       => $principalUri,
-            '{' . CalDAV\Plugin::NS_CALENDARSERVER . '}getctag'                  => 'http://sabre.io/ns/sync/0',
-            '{http://sabredav.org/ns}sync-token'                                 => '0',
-            '{' . CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new CalDAV\Xml\Property\SupportedCalendarComponentSet($components),
-            '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp'         => new CalDAV\Xml\Property\ScheduleCalendarTransp('opaque'),
-        ];
-        $calendars[] = $calendar;
+        $usercalendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->findOneByUser(4918);
+
+        if($usercalendar instanceof Calendar) {
+            $components = [];
+            $calendar = [
+                'id' => $usercalendar->getId(),
+                'uri' => 'doctorio',
+                'principaluri' => $principalUri,
+                '{' . CalDAV\Plugin::NS_CALENDARSERVER . '}getctag' => 'http://sabre.io/ns/sync/0',
+                '{http://sabredav.org/ns}sync-token' => '0',
+                '{' . CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new CalDAV\Xml\Property\SupportedCalendarComponentSet($components),
+                '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp' => new CalDAV\Xml\Property\ScheduleCalendarTransp('opaque'),
+            ];
+            $calendars[] = $calendar;
+        }
 
         return $calendars;
     }
@@ -170,7 +175,24 @@ class CalDavBackend implements BackendInterface
      */
     public function getCalendarObjects($calendarId)
     {
-        return array($calendarId);
+        $result = [];
+
+        $usercalendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->findOneByUser(4918);
+        if($usercalendar instanceof Calendar) {
+            foreach ($usercalendar->getEvents() as $event) {
+                $result[] = [
+                    'id'           => $event->getId(),
+                    'uri'          => $event->getTitle(),
+                    'lastmodified' => $event->getUpdatedAt(),
+                    'etag'         => '"' . md5($event->getTitle()) . '"',
+                    'calendarid'   => $usercalendar->getId(),
+                    'size'         => (int)123,
+                    'component'    => 'vevent',
+                ];
+            }
+        }
+
+        return $result;
     }
 
     /**
