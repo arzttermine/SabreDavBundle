@@ -211,7 +211,22 @@ class CalDavBackend implements BackendInterface
      */
     public function getCalendarObject($calendarId, $objectUri)
     {
-        return array($calendarId);
+        //get from database via $calendarId and $objectUri
+        $row = 1;
+
+        //if not found
+        if (!$row) return null;
+
+        return [
+            'id'            => 123,
+            'uri'           => $objectUri,
+            'lastmodified'  => '',
+            'etag'          => '"' . md5($objectUri) . '"',
+            'calendarid'    => $calendarId,
+            'size'          => (int)123,
+            'calendardata'  => '',
+            'component'     => 'vevent',
+        ];
     }
 
     /**
@@ -249,7 +264,93 @@ class CalDavBackend implements BackendInterface
      */
     public function createCalendarObject($calendarId, $objectUri, $calendarData)
     {
-        return null;
+        $extraData = $this->getDenormalizedData($calendarData);
+
+        //store in database
+
+        return '"' . $extraData['etag'] . '"';
+    }
+
+    /**
+     * Parses some information from calendar objects, used for optimized
+     * calendar-queries.
+     *
+     * Returns an array with the following keys:
+     *   * etag - An md5 checksum of the object without the quotes.
+     *   * size - Size of the object in bytes
+     *   * componentType - VEVENT, VTODO or VJOURNAL
+     *   * firstOccurence
+     *   * lastOccurence
+     *   * uid - value of the UID property
+     *
+     * @param string $calendarData
+     * @return array
+     */
+    protected function getDenormalizedData($calendarData) {
+
+        $vObject = \Sabre\VObject\Reader::read($calendarData);
+        $componentType = null;
+        $component = null;
+        $firstOccurence = null;
+        $lastOccurence = null;
+        $uid = null;
+        foreach ($vObject->getComponents() as $component) {
+            if ($component->name !== 'VTIMEZONE') {
+                $componentType = $component->name;
+                $uid = (string)$component->UID;
+                break;
+            }
+        }
+        if (!$componentType) {
+            throw new \Sabre\DAV\Exception\BadRequest('Calendar objects must have a VJOURNAL, VEVENT or VTODO component');
+        }
+        if ($componentType === 'VEVENT') {
+            $firstOccurence = $component->DTSTART->getDateTime()->getTimeStamp();
+            // Finding the last occurence is a bit harder
+            if (!isset($component->RRULE)) {
+                if (isset($component->DTEND)) {
+                    $lastOccurence = $component->DTEND->getDateTime()->getTimeStamp();
+                } elseif (isset($component->DURATION)) {
+                    $endDate = clone $component->DTSTART->getDateTime();
+                    $endDate = $endDate->add(\Sabre\VObject\DateTimeParser::parse($component->DURATION->getValue()));
+                    $lastOccurence = $endDate->getTimeStamp();
+                } elseif (!$component->DTSTART->hasTime()) {
+                    $endDate = clone $component->DTSTART->getDateTime();
+                    $endDate = $endDate->modify('+1 day');
+                    $lastOccurence = $endDate->getTimeStamp();
+                } else {
+                    $lastOccurence = $firstOccurence;
+                }
+            } else {
+                $it = new \Sabre\VObject\Recur\EventIterator($vObject, (string)$component->UID);
+                $maxDate = new \DateTime(self::MAX_DATE);
+                if ($it->isInfinite()) {
+                    $lastOccurence = $maxDate->getTimeStamp();
+                } else {
+                    $end = $it->getDtEnd();
+                    while ($it->valid() && $end < $maxDate) {
+                        $end = $it->getDtEnd();
+                        $it->next();
+
+                    }
+                    $lastOccurence = $end->getTimeStamp();
+                }
+
+            }
+        }
+
+        // Destroy circular references to PHP will GC the object.
+        $vObject->destroy();
+
+        return [
+            'etag'           => md5($calendarData),
+            'size'           => strlen($calendarData),
+            'componentType'  => $componentType,
+            'firstOccurence' => $firstOccurence,
+            'lastOccurence'  => $lastOccurence,
+            'uid'            => $uid,
+        ];
+
     }
 
     /**
@@ -270,7 +371,11 @@ class CalDavBackend implements BackendInterface
      */
     public function updateCalendarObject($calendarId, $objectUri, $calendarData)
     {
-        return null;
+        $extraData = $this->getDenormalizedData($calendarData);
+
+        //update database
+
+        return '"' . $extraData['etag'] . '"';
     }
 
     /**
@@ -282,7 +387,7 @@ class CalDavBackend implements BackendInterface
      */
     public function deleteCalendarObject($calendarId, $objectUri)
     {
-        return null;
+        //simply delete from database
     }
 
     /**
