@@ -25,6 +25,22 @@ class CalDavBackend implements BackendInterface
     private $calendarobjects_class;
 
     /**
+     * List of CalDAV properties, and how they map to database fieldnames
+     * Add your own properties by simply adding on to this array.
+     *
+     * Note that only string-based properties are supported here.
+     *
+     * @var array
+     */
+    public $propertyMap = [
+        '{DAV:}displayname'                                   => 'displayname',
+        '{urn:ietf:params:xml:ns:caldav}calendar-description' => 'description',
+        '{urn:ietf:params:xml:ns:caldav}calendar-timezone'    => 'timezone',
+        '{http://apple.com/ns/ical/}calendar-order'           => 'calendarorder',
+        '{http://apple.com/ns/ical/}calendar-color'           => 'calendarcolor',
+    ];
+
+    /**
      * Constructor
      *
      * @param \Doctrine\ORM\EntityManager $em 
@@ -132,7 +148,38 @@ class CalDavBackend implements BackendInterface
      */
     public function updateCalendar($calendarId, \Sabre\DAV\PropPatch $propPatch)
     {
-        return true;
+        $supportedProperties = array_keys($this->propertyMap);
+        $supportedProperties[] = '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp';
+
+        $propPatch->handle($supportedProperties, function($mutations) use ($calendarId) {
+            $newValues = [];
+            foreach ($mutations as $propertyName => $propertyValue) {
+
+                switch ($propertyName) {
+                    case '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp' :
+                        $fieldName = 'transparent';
+                        $newValues[$fieldName] = $propertyValue->getValue() === 'transparent';
+                        break;
+                    default :
+                        $fieldName = $this->propertyMap[$propertyName];
+                        $newValues[$fieldName] = $propertyValue;
+                        break;
+                }
+
+            }
+            $valuesSql = [];
+            foreach ($newValues as $fieldName => $value) {
+                $valuesSql[] = $fieldName . ' = ?';
+            }
+
+            //update calendar in database
+//            $stmt = $this->pdo->prepare("UPDATE " . $this->calendarTableName . " SET " . implode(', ', $valuesSql) . " WHERE id = ?");
+//            $newValues['id'] = $calendarId;
+//            $stmt->execute(array_values($newValues));
+            
+            return true;
+
+        });
     }
 
     /**
