@@ -19,14 +19,14 @@ services:
   arzttermine.sabredav_principal_plugin:
     class: Sabre\DAVACL\Plugin
     tags:
-        - { name: arzttermine.sabredav.plugin }
+        - { name: sabredav.plugin }
 
   arzttermine.sabredav_principal_collection:
     class: Sabre\DAVACL\PrincipalCollection
     arguments:
         - "@arzttermine.sabredav_principal_backend"
     tags:
-        - { name: arzttermine.sabredav.collection }
+        - { name: sabredav.collection }
 
   arzttermine.sabredav_principal_backend:
     class: Arzttermine\SabreDavBundle\SabreDav\PrincipalBackend
@@ -37,7 +37,7 @@ services:
   arzttermine.sabredav_caldav_plugin:
     class: Sabre\DAVACL\Plugin
     tags:
-        - { name: arzttermine.sabredav.plugin }
+        - { name: sabredav.plugin }
 
   arzttermine.sabredav_caldav_collection:
     class: Sabre\CalDAV\CalendarRoot
@@ -45,7 +45,7 @@ services:
         - "@arzttermine.sabredav_principal_backend"
         - "@arzttermine.sabredav_caldav_backend"
     tags:
-        - { name: arzttermine.sabredav.collection }
+        - { name: sabredav.collection }
 
   arzttermine.sabredav_caldav_backend:
     class: Arzttermine\SabreDavBundle\SabreDav\CalDavBackend

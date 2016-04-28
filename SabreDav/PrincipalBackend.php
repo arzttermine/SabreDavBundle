@@ -78,7 +78,7 @@ class PrincipalBackend extends AbstractBackend implements CreatePrincipalSupport
     public function __construct($em, $um)
     {
         $this->em = $em;
-        $this->principals_class = 'Symfony\Component\Security\Core\User\User';
+        $this->principals_class = 'Arzttermine\UserBundle\Entity\User';
         $this->principalgroups_class = '';
         $this->user_manager = $um;
     }

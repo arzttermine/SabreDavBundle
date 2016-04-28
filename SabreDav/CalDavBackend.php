@@ -61,7 +61,7 @@ class CalDavBackend implements BackendInterface
         $usercalendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->findOneByUser(4918);
 
         if($usercalendar instanceof Calendar) {
-            $components = [];
+	    $components = ['VEVENT'];
             $calendar = [
                 'id' => $usercalendar->getId(),
                 'uri' => 'doctorio',
