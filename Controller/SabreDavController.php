@@ -28,7 +28,7 @@ class SabreDavController
     {
         $router->getContext()->setBaseUrl($router->getContext()->getBaseUrl());
         $this->dav = $dav;
-	$this->dav::$exposeVersion = false;
+	    $this->dav::$exposeVersion = false;
         $this->dav->setBaseUri($router->generate('arzttermine_sabre_dav', array()));
     }
 
