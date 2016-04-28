@@ -38,6 +38,10 @@ class SabreDavController
      */
     public function execAction(Request $request)
     {
+	if($request->headers->has('Content-Length') && $request->headers->get('Content-Length') === '') {
+            $request->headers->set('Content-Length', strlen($request->getContent()));
+        }
+
         $dav = $this->dav;
         $callback = function () use ($dav) {
             $dav->exec();
