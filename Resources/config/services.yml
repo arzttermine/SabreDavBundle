@@ -2,10 +2,10 @@ services:
   arzttermine.sabredav.controller:
     class: Arzttermine\SabreDavBundle\Controller\SabreDavController 
     arguments:
-        - "@arzttermine.sabredav.server"
+        - "@sabredav.server"
         - "@router"
 
-  arzttermine.sabredav.server:
+  sabredav.server:
     class: Sabre\DAV\Server 
     arguments:
         - ["@arzttermine.sabredav_principal_collection", "@arzttermine.sabredav_caldav_collection"]
