@@ -15,9 +15,6 @@ services:
     calls:
         - [setHideNodesFromListings, [true]]
         - [setAccessToNodesWithoutACL, [true]]
-
-  arzttermine.sabredav_principal_plugin:
-    class: Sabre\DAVACL\Plugin
     tags:
         - { name: sabredav.plugin }
 
@@ -35,7 +32,7 @@ services:
         - "@fos_user.user_manager"
 
   arzttermine.sabredav_caldav_plugin:
-    class: Sabre\DAVACL\Plugin
+    class: Sabre\CalDAV\Plugin
     tags:
         - { name: sabredav.plugin }
 
