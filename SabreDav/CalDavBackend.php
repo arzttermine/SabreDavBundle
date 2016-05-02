@@ -2,6 +2,7 @@
 namespace Arzttermine\SabreDavBundle\SabreDav;
 
 use Arzttermine\CalendarBundle\Entity\Calendar;
+use Arzttermine\CalendarBundle\Entity\Event;
 use Sabre\CalDAV;
 use Sabre\CalDAV\Backend\BackendInterface;
 use Sabre\DAV\Exception;
@@ -259,20 +260,20 @@ class CalDavBackend implements BackendInterface
     public function getCalendarObject($calendarId, $objectUri)
     {
         //get from database via $calendarId and $objectUri
-        $row = 1;
+        $event = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findOneBy(array('calendar'=>$calendarId, 'title'=>$objectUri));
 
-        //if not found
-        if (!$row) return null;
+        if($event === null) {
+            return null;
+        }
 
         return [
-            'id'            => 123,
-            'uri'           => $objectUri,
-            'lastmodified'  => '',
-            'etag'          => '"' . md5($objectUri) . '"',
-            'calendarid'    => $calendarId,
-            'size'          => (int)123,
-            'calendardata'  => '',
-            'component'     => 'vevent',
+            'id'           => $event->getId(),
+            'uri'          => $event->getTitle(),
+            'lastmodified' => $event->getUpdatedAt(),
+            'etag'         => '"' . md5($event->getTitle()) . '"',
+            'calendarid'   => $calendarId,
+            'size'         => (int)123,
+            'component'    => 'vevent',
         ];
     }
 
@@ -313,7 +314,39 @@ class CalDavBackend implements BackendInterface
     {
         $extraData = $this->getDenormalizedData($calendarData);
 
+        if($extraData['componentType'] != 'VEVENT') {
+            return null;
+        }
+
+        $calendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->find($calendarId);
+
+
         //store in database
+        $event = new Event();
+        $event->setEtag($extraData['etag']);
+        $event->setSize($extraData['size']);
+        $event->setUid($extraData['uid']);
+        $event->setObjectUri($objectUri);
+        $event->setCaldavData($calendarData);
+        $event->setTitle($extraData['title']);
+        $event->setComment($extraData['comment']);
+        $startDate = new \DateTime();
+        $startDate->setTimestamp($extraData['firstOccurence']);
+        $event->setStartDate($startDate);
+        $endDate = new \DateTime();
+        $endDate->setTimestamp($extraData['lastOccurence']);
+        $event->setEndDate($endDate);
+        $days = $startDate->diff($endDate)->format('%R%a');
+        $event->setAllDay(($days == '+1'));
+
+        $event->setCalendar($calendar);
+        $calendar->addEvent($event);
+        $event->setResources($calendar->getDefaultResources());
+        $event->setRepeat(false);
+
+        $this->em->persist($event);
+        $this->em->flush();
+
 
         return '"' . $extraData['etag'] . '"';
     }
@@ -368,6 +401,9 @@ class CalDavBackend implements BackendInterface
                 } else {
                     $lastOccurence = $firstOccurence;
                 }
+
+                $title = (isset($component->SUMMARY))?$component->SUMMARY->getRawMimeDirValue():'';
+                $comment = (isset($component->DESCRIPTION))?$component->DESCRIPTION->getRawMimeDirValue():'';
             } else {
                 $it = new \Sabre\VObject\Recur\EventIterator($vObject, (string)$component->UID);
                 $maxDate = new \DateTime(self::MAX_DATE);
@@ -396,6 +432,8 @@ class CalDavBackend implements BackendInterface
             'firstOccurence' => $firstOccurence,
             'lastOccurence'  => $lastOccurence,
             'uid'            => $uid,
+            'title'          => $title,
+            'comment'        => $comment
         ];
 
     }
