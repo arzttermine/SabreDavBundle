@@ -225,16 +225,17 @@ class CalDavBackend implements BackendInterface
     {
         $result = [];
 
-        $usercalendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->findOneByUser(4918);
+        $usercalendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->find($calendarId);
         if($usercalendar instanceof Calendar) {
+            /* @var Event $event */
             foreach ($usercalendar->getEvents() as $event) {
                 $result[] = [
                     'id'           => $event->getId(),
-                    'uri'          => $event->getTitle(),
+                    'uri'          => $event->getObjectUri(),
                     'lastmodified' => $event->getUpdatedAt(),
-                    'etag'         => '"' . md5($event->getTitle()) . '"',
-                    'calendarid'   => $usercalendar->getId(),
-                    'size'         => (int)123,
+                    'etag'         => '"' . $event->getEtag() . '"',
+                    'calendarid'   => $calendarId,
+                    'size'         => (int)$event->getSize(),
                     'component'    => 'vevent',
                 ];
             }
@@ -260,21 +261,21 @@ class CalDavBackend implements BackendInterface
     public function getCalendarObject($calendarId, $objectUri)
     {
         //get from database via $calendarId and $objectUri
-        $event = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findOneBy(array('calendar'=>$calendarId, 'title'=>$objectUri));
+        $event = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findOneBy(array('calendar'=>$calendarId, 'objectUri'=>$objectUri));
 
         if($event === null) {
             return null;
         }
 
         return [
-            'id'           => $event->getId(),
-            'uri'          => $event->getTitle(),
-            'lastmodified' => $event->getUpdatedAt(),
-            'etag'         => '"' . md5($event->getTitle()) . '"',
-            'calendarid'   => $calendarId,
-            'size'         => (int)123,
-            'component'    => 'vevent',
-        ];
+                'id'           => $event->getId(),
+                'uri'          => $event->getObjectUri(),
+                'lastmodified' => $event->getUpdatedAt(),
+                'etag'         => '"' . $event->getEtag() . '"',
+                'calendarid'   => $calendarId,
+                'size'         => (int)$event->getSize(),
+                'component'    => 'vevent',
+            ];
     }
 
     /**
@@ -322,6 +323,7 @@ class CalDavBackend implements BackendInterface
 
 
         //store in database
+        /* @var Event $event */
         $event = new Event();
         $event->setEtag($extraData['etag']);
         $event->setSize($extraData['size']);
@@ -338,6 +340,10 @@ class CalDavBackend implements BackendInterface
         $event->setEndDate($endDate);
         $days = $startDate->diff($endDate)->format('%R%a');
         $event->setAllDay(($days == '+1'));
+        //allDay events have endDate == startDate on doctorio calendar
+        if($event->getAllDay() === true) {
+            $endDate->setTimestamp($extraData['firstOccurence']);
+        }
 
         $event->setCalendar($calendar);
         $calendar->addEvent($event);
@@ -458,7 +464,40 @@ class CalDavBackend implements BackendInterface
     {
         $extraData = $this->getDenormalizedData($calendarData);
 
-        //update database
+        if($extraData['componentType'] != 'VEVENT') {
+            return null;
+        }
+
+        $event = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findOneBy(array('calendar'=>$calendarId, 'objectUri'=>$objectUri));
+
+        if($event === null) {
+            return null;
+        }
+
+        //store in database
+        /* @var Event $event */
+        $event->setEtag($extraData['etag']);
+        $event->setSize($extraData['size']);
+        $event->setUid($extraData['uid']);
+        $event->setCaldavData($calendarData);
+        $event->setTitle($extraData['title']);
+        $event->setComment($extraData['comment']);
+        $startDate = new \DateTime();
+        $startDate->setTimestamp($extraData['firstOccurence']);
+        $event->setStartDate($startDate);
+        $endDate = new \DateTime();
+        $endDate->setTimestamp($extraData['lastOccurence']);
+        $event->setEndDate($endDate);
+        $days = $startDate->diff($endDate)->format('%R%a');
+        $event->setAllDay(($days == '+1'));
+        //allDay events have endDate == startDate on doctorio calendar
+        if($event->getAllDay() === true) {
+            $endDate->setTimestamp($extraData['firstOccurence']);
+        }
+
+        $this->em->persist($event);
+        $this->em->flush();
+
 
         return '"' . $extraData['etag'] . '"';
     }
@@ -473,6 +512,12 @@ class CalDavBackend implements BackendInterface
     public function deleteCalendarObject($calendarId, $objectUri)
     {
         //simply delete from database
+        $event = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findOneBy(array('calendar'=>$calendarId, 'objectUri'=>$objectUri));
+
+        if($event !== null) {
+            $this->em->remove($event);
+            $this->em->flush();
+        }
     }
 
     /**
@@ -550,7 +595,22 @@ class CalDavBackend implements BackendInterface
      */
     function getCalendarObjectByUID($principalUri, $uid)
     {
-        return null;
+        //get from database via $calendarId and $objectUri
+        $event = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findOneBy(array('uid'=>$uid));
+
+        if($event === null) {
+            return null;
+        }
+
+        return [
+            'id'           => $event->getId(),
+            'uri'          => $event->getObjectUri(),
+            'lastmodified' => $event->getUpdatedAt(),
+            'etag'         => '"' . $event->getEtag() . '"',
+            'calendarid'   => $calendarId,
+            'size'         => (int)$event->getSize(),
+            'component'    => 'vevent',
+        ];
     }
 }
 
