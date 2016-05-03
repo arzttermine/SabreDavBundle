@@ -296,8 +296,7 @@ class CalDavBackend implements BackendInterface
     function getMultipleCalendarObjects($calendarId, array $uris)
     {
         $result = [];
-$test = implode(',', $uris);
-        $events = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findBy(array('calendar'=>$calendarId, 'object_uri'=>implode(',', $uris)));
+        $events = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findBy(array('calendar'=>$calendarId, 'objectUri'=>$uris));
 
         foreach($events as $event)
         {
