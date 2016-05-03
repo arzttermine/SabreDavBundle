@@ -78,13 +78,14 @@ class CalDavBackend implements BackendInterface
         $usercalendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->findOneByUser(4918);
 
         if($usercalendar instanceof Calendar) {
+        $ctag = $usercalendar->getUpdatedAt()->getTimestamp();
 	    $components = ['VEVENT'];
             $calendar = [
                 'id' => $usercalendar->getId(),
                 'uri' => 'doctorio',
                 'principaluri' => $principalUri,
-                '{' . CalDAV\Plugin::NS_CALENDARSERVER . '}getctag' => 'http://sabre.io/ns/sync/0',
-                '{http://sabredav.org/ns}sync-token' => '0',
+                '{' . CalDAV\Plugin::NS_CALENDARSERVER . '}getctag' => 'http://sabre.io/ns/sync/'.$ctag,
+                '{http://sabredav.org/ns}sync-token' => $ctag,
                 '{' . CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new CalDAV\Xml\Property\SupportedCalendarComponentSet($components),
                 '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp' => new CalDAV\Xml\Property\ScheduleCalendarTransp('opaque'),
             ];
@@ -236,6 +237,7 @@ class CalDavBackend implements BackendInterface
                     'etag'         => '"' . $event->getEtag() . '"',
                     'calendarid'   => $calendarId,
                     'size'         => (int)$event->getSize(),
+                    'calendardata'  => $event->getCaldavData(),
                     'component'    => 'vevent',
                 ];
             }
@@ -274,6 +276,7 @@ class CalDavBackend implements BackendInterface
                 'etag'         => '"' . $event->getEtag() . '"',
                 'calendarid'   => $calendarId,
                 'size'         => (int)$event->getSize(),
+                'calendardata'  => $event->getCaldavData(),
                 'component'    => 'vevent',
             ];
     }
@@ -292,7 +295,26 @@ class CalDavBackend implements BackendInterface
      */
     function getMultipleCalendarObjects($calendarId, array $uris)
     {
-        return array($calendarId);
+        $result = [];
+$test = implode(',', $uris);
+        $events = $this->em->getRepository('ArzttermineCalendarBundle:Event')->findBy(array('calendar'=>$calendarId, 'object_uri'=>implode(',', $uris)));
+
+        foreach($events as $event)
+        {
+            $result[] = [
+                'id'           => $event->getId(),
+                'uri'          => $event->getObjectUri(),
+                'lastmodified' => $event->getUpdatedAt(),
+                'etag'         => '"' . $event->getEtag() . '"',
+                'calendarid'   => $calendarId,
+                'size'         => (int)$event->getSize(),
+                'calendardata' => $event->getCaldavData(),
+                'component'    => 'vevent',
+            ];
+        }
+
+
+        return $result;
     }
 
     /**
@@ -494,6 +516,7 @@ class CalDavBackend implements BackendInterface
         if($event->getAllDay() === true) {
             $endDate->setTimestamp($extraData['firstOccurence']);
         }
+        $event->getCalendar()->setUpdatedAt(new \DateTime());
 
         $this->em->persist($event);
         $this->em->flush();
@@ -571,7 +594,36 @@ class CalDavBackend implements BackendInterface
      */
     public function calendarQuery($calendarId, array $filters)
     {
-        return array($calendarId);
+        $result = [];
+
+        if (count($filters['comp-filters']) > 0 && !$filters['comp-filters'][0]['is-not-defined']) {
+            if (isset($filters['comp-filters'][0]['time-range'])) {
+                $timeRange = $filters['comp-filters'][0]['time-range'];
+            }
+        }
+
+        $qb = $this->em->getRepository('ArzttermineCalendarBundle:Event')->createQueryBuilder('u');
+        $qb->select('partial u.{id, objectUri}')
+            ->where('u.calendar = :calendar')
+            ->setParameter('calendar', $calendarId);
+        $qb->andWhere($qb->expr()->isNotNull('u.objectUri'));
+
+        if(isset($timeRange['start'])) {
+            $qb->andWhere($qb->expr()->gte('u.start_date', ':start_date'))
+                ->setParameter('start_date', $timeRange['start']->format('Y-m-d H:i:s'));
+        }
+        if(isset($timeRange['end'])) {
+            $qb->andWhere($qb->expr()->lte('u.end_date', ':end_date'))
+                ->setParameter('end_date', $timeRange['end']->format('Y-m-d H:i:s'));
+        }
+
+        $items = $qb->getQuery()->getScalarResult();
+
+        foreach($items as $event) {
+            $result[] = $event['u_objectUri'];
+        }
+
+        return $result;
     }
 
     /**
@@ -609,6 +661,7 @@ class CalDavBackend implements BackendInterface
             'etag'         => '"' . $event->getEtag() . '"',
             'calendarid'   => $calendarId,
             'size'         => (int)$event->getSize(),
+            'calendardata'  => $event->getCaldavData(),
             'component'    => 'vevent',
         ];
     }

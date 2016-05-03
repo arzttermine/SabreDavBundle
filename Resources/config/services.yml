@@ -31,6 +31,11 @@ services:
         - "@doctrine.orm.entity_manager"
         - "@fos_user.user_manager"
 
+  arzttermine.sabredav_sync_plugin:
+    class: Sabre\DAV\Sync\Plugin
+    tags:
+        - { name: sabredav.plugin }
+
   arzttermine.sabredav_caldav_plugin:
     class: Sabre\CalDAV\Plugin
     tags:
