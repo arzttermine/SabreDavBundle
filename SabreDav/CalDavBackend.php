@@ -90,7 +90,7 @@ class CalDavBackend implements BackendInterface
         $usercalendar = $user->getCalendar();
 
         if($usercalendar instanceof Calendar) {
-        $ctag = $usercalendar->getUpdatedAt()->getTimestamp();
+        $ctag = ($usercalendar->getUpdatedAt() instanceof \DateTime === false)?$usercalendar->getUpdatedAt()->getTimestamp():time();
 	    $components = ['VEVENT'];
             $calendar = [
                 'id' => $usercalendar->getId(),
