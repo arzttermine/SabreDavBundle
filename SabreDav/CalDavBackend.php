@@ -3,6 +3,7 @@ namespace Arzttermine\SabreDavBundle\SabreDav;
 
 use Arzttermine\CalendarBundle\Entity\Calendar;
 use Arzttermine\CalendarBundle\Entity\Event;
+use Arzttermine\UserBundle\Entity\User;
 use Sabre\CalDAV;
 use Sabre\CalDAV\Backend\BackendInterface;
 use Sabre\DAV\Exception;
@@ -14,6 +15,11 @@ class CalDavBackend implements BackendInterface
      * @var \Doctrine\ORM\EntityManager 
      */
     private $em;
+
+    /**
+     * @var \FOS\UserBundle\Model\UserManagerInterface
+     */
+    private $user_manager;
 
     /**
      * @var string
@@ -46,9 +52,10 @@ class CalDavBackend implements BackendInterface
      *
      * @param \Doctrine\ORM\EntityManager $em 
      */
-    public function __construct($em)
+    public function __construct($em, $um)
     {
         $this->em = $em;
+        $this->user_manager = $um;
 
         $this->calendar_class = '';
         $this->calendarobjects_class = '';
@@ -75,7 +82,12 @@ class CalDavBackend implements BackendInterface
     {
 	    $calendars = [];
 
-        $usercalendar = $this->em->getRepository('ArzttermineCalendarBundle:Calendar')->findOneByUser(4918);
+        $username = substr(strrchr($principalUri, '/'),1);
+        $user = $this->user_manager->findUserByUsername($username);
+        if($user instanceof User === false) {
+            return $calendars;
+        }
+        $usercalendar = $user->getCalendar();
 
         if($usercalendar instanceof Calendar) {
         $ctag = $usercalendar->getUpdatedAt()->getTimestamp();
@@ -175,9 +187,7 @@ class CalDavBackend implements BackendInterface
             }
 
             //update calendar in database
-//            $stmt = $this->pdo->prepare("UPDATE " . $this->calendarTableName . " SET " . implode(', ', $valuesSql) . " WHERE id = ?");
-//            $newValues['id'] = $calendarId;
-//            $stmt->execute(array_values($newValues));
+            //...
             
             return true;
 

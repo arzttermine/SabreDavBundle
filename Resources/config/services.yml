@@ -67,3 +67,4 @@ services:
     class: Arzttermine\SabreDavBundle\SabreDav\CalDavBackend
     arguments:
         - "@doctrine.orm.entity_manager"
+        - "@fos_user.user_manager"
