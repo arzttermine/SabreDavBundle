@@ -31,6 +31,20 @@ services:
         - "@doctrine.orm.entity_manager"
         - "@fos_user.user_manager"
 
+  arzttermine.sabredav_auth_plugin:
+      class: Sabre\DAV\Auth\Plugin
+      arguments:
+        - "@arzttermine.sabredav_auth_backend"
+      tags:
+          - { name: sabredav.plugin }
+
+  arzttermine.sabredav_auth_backend:
+      class: Arzttermine\SabreDavBundle\SabreDav\AuthBackend
+      arguments:
+          - "doct0rio"
+          - "@doctrine.orm.entity_manager"
+          - "@fos_user.user_manager"
+
   arzttermine.sabredav_sync_plugin:
     class: Sabre\DAV\Sync\Plugin
     tags:
