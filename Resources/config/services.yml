@@ -4,6 +4,7 @@ services:
     arguments:
         - "@sabredav.server"
         - "@router"
+        - "@logger"
 
   sabredav.server:
     class: Sabre\DAV\Server 
