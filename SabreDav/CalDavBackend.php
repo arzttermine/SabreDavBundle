@@ -90,8 +90,8 @@ class CalDavBackend implements BackendInterface
         $usercalendar = $user->getCalendar();
 
         if($usercalendar instanceof Calendar) {
-        $ctag = ($usercalendar->getUpdatedAt() instanceof \DateTime !== false)?$usercalendar->getUpdatedAt()->getTimestamp():time();
-	    $components = ['VEVENT'];
+            $ctag = ($usercalendar->getUpdatedAt() instanceof \DateTime !== false)?$usercalendar->getUpdatedAt()->getTimestamp():time();
+	        $components = ['VEVENT'];
             $calendar = [
                 'id' => $usercalendar->getId(),
                 'uri' => 'doctorio',
@@ -100,6 +100,10 @@ class CalDavBackend implements BackendInterface
                 '{http://sabredav.org/ns}sync-token' => $ctag,
                 '{' . CalDAV\Plugin::NS_CALDAV . '}supported-calendar-component-set' => new CalDAV\Xml\Property\SupportedCalendarComponentSet($components),
                 '{' . CalDAV\Plugin::NS_CALDAV . '}schedule-calendar-transp' => new CalDAV\Xml\Property\ScheduleCalendarTransp('opaque'),
+                '{' . CalDAV\Plugin::NS_CALDAV . '}calendar-description' => 'This is your doctorio.es calendar',
+                '{DAV:}displayname' => 'doctorio',
+                '{http://apple.com/ns/ical/}calendar-color' => '#1C4587FF',
+                '{http://apple.com/ns/ical/}calendar-order' => '1'
             ];
             $calendars[] = $calendar;
         }
