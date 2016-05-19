@@ -10,13 +10,13 @@ services:
     arguments:
         - ["@arzttermine.sabredav_principal_collection", "@arzttermine.sabredav_caldav_collection"]
 
-#  arzttermine.sabredav_acl_plugin:
-#    class: Arzttermine\SabreDavBundle\SabreDav\ACLPlugin
-#    calls:
-#        - [setHideNodesFromListings, [false]]
-#        - [setAccessToNodesWithoutACL, [true]]
-#    tags:
-#        - { name: sabredav.plugin }
+  arzttermine.sabredav_acl_plugin:
+    class: Arzttermine\SabreDavBundle\SabreDav\ACLPlugin
+    calls:
+        - [setHideNodesFromListings, [false]]
+        - [setAccessToNodesWithoutACL, [true]]
+    tags:
+        - { name: sabredav.plugin }
 
   arzttermine.sabredav_principal_collection:
     class: Sabre\DAVACL\PrincipalCollection
