@@ -379,7 +379,8 @@ class CalDavBackend implements BackendInterface
         if($event->getAllDay() === true) {
             $endDate->setTimestamp($extraData['firstOccurence']);
         }
-
+	
+	$event->setCreatedBy($calendar->getUser()->getId());
         $event->setCalendar($calendar);
         $calendar->addEvent($event);
         $event->setResources($calendar->getDefaultResources());
