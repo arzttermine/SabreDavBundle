@@ -14,7 +14,7 @@
     ],
     "require": {
 	"php": ">=5.5.9",
-        "symfony/symfony": "3.0.*",
+        "symfony/symfony": "v3.1.0-RC1",
         "sabre/dav": "~3.0"
     },
     "suggest": {
