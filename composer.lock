@@ -4,8 +4,8 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "hash": "d7ecfcf026a7678879cd667b09944949",
-    "content-hash": "c954c324e12775e9bde6d299b34f5a14",
+    "hash": "1bba6e0ca93e09fb513ff72a98dc4534",
+    "content-hash": "37226b6660fb0c697c115e614d551f14",
     "packages": [
         {
             "name": "doctrine/annotations",
@@ -539,16 +539,16 @@
         },
         {
             "name": "sabre/dav",
-            "version": "3.1.3",
+            "version": "3.1.4",
             "source": {
                 "type": "git",
                 "url": "https://github.com/fruux/sabre-dav.git",
-                "reference": "8a266c7b5e140da79529414b9cde2a2d058b536b"
+                "reference": "e4098cb78375ef8680cfdebab82c273848117243"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/fruux/sabre-dav/zipball/8a266c7b5e140da79529414b9cde2a2d058b536b",
-                "reference": "8a266c7b5e140da79529414b9cde2a2d058b536b",
+                "url": "https://api.github.com/repos/fruux/sabre-dav/zipball/e4098cb78375ef8680cfdebab82c273848117243",
+                "reference": "e4098cb78375ef8680cfdebab82c273848117243",
                 "shasum": ""
             },
             "require": {
@@ -616,7 +616,7 @@
                 "framework",
                 "iCalendar"
             ],
-            "time": "2016-04-07 01:02:57"
+            "time": "2016-05-29 00:52:33"
         },
         {
             "name": "sabre/event",
@@ -1225,16 +1225,16 @@
         },
         {
             "name": "symfony/symfony",
-            "version": "v3.1.0-RC1",
+            "version": "v3.1.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/symfony/symfony.git",
-                "reference": "52f75d852f72680d820fe8892474dda9fa6cb9fc"
+                "reference": "e71d4713c506686e6cf027af44c97ee5d94c7db4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/symfony/symfony/zipball/52f75d852f72680d820fe8892474dda9fa6cb9fc",
-                "reference": "52f75d852f72680d820fe8892474dda9fa6cb9fc",
+                "url": "https://api.github.com/repos/symfony/symfony/zipball/e71d4713c506686e6cf027af44c97ee5d94c7db4",
+                "reference": "e71d4713c506686e6cf027af44c97ee5d94c7db4",
                 "shasum": ""
             },
             "require": {
@@ -1356,20 +1356,20 @@
             "keywords": [
                 "framework"
             ],
-            "time": "2016-05-26 08:31:29"
+            "time": "2016-05-30 07:24:54"
         },
         {
             "name": "twig/twig",
-            "version": "v1.24.0",
+            "version": "v1.24.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/twigphp/Twig.git",
-                "reference": "3e5aa30ebfbafd5951fb1b01e338e1800ce7e0e8"
+                "reference": "3566d311a92aae4deec6e48682dc5a4528c4a512"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/twigphp/Twig/zipball/3e5aa30ebfbafd5951fb1b01e338e1800ce7e0e8",
-                "reference": "3e5aa30ebfbafd5951fb1b01e338e1800ce7e0e8",
+                "url": "https://api.github.com/repos/twigphp/Twig/zipball/3566d311a92aae4deec6e48682dc5a4528c4a512",
+                "reference": "3566d311a92aae4deec6e48682dc5a4528c4a512",
                 "shasum": ""
             },
             "require": {
@@ -1417,15 +1417,13 @@
             "keywords": [
                 "templating"
             ],
-            "time": "2016-01-25 21:22:18"
+            "time": "2016-05-30 09:11:59"
         }
     ],
     "packages-dev": [],
     "aliases": [],
     "minimum-stability": "stable",
-    "stability-flags": {
-        "symfony/symfony": 5
-    },
+    "stability-flags": [],
     "prefer-stable": false,
     "prefer-lowest": false,
     "platform": {
